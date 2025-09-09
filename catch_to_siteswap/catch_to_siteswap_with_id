@@ -59,6 +59,40 @@ events = [
     {"time": 2.20, "ball_id": 1},
 ]
 
+
+def validate_siteswap(siteswap):
+    """
+    Vérifie la cohérence d'une séquence de siteswap.
+    siteswap: liste d'entiers
+    Retourne un dict avec diagnostic
+    """
+    n = len(siteswap)
+    total = sum(siteswap)
+
+    # condition 1 : moyenne entière
+    mean_balls = total / n
+    balls_ok = mean_balls.is_integer()
+
+    # condition 2 : pas de collisions
+    landings = [(i + siteswap[i]) % n for i in range(n)]
+    collisions = len(landings) != len(set(landings))
+
+    # rapport
+    result = {
+        "length": n,
+        "sequence": siteswap,
+        "mean_balls": mean_balls,
+        "balls_ok": balls_ok,
+        "collisions": collisions,
+        "valid": balls_ok and not collisions,
+    }
+    return result
+
+
 s, conf = compute_siteswap(events)
-print("Siteswap:", s)
-print("Confiance:", conf)
+report = validate_siteswap(s)
+
+if report["valid"]:
+    print("Siteswap cohérent :", s, "(", report["mean_balls"], "balles )")
+else:
+    print("⚠️ Problème détecté :", report)
