@@ -1,6 +1,8 @@
 import os
 import sys
 import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # Supprime les logs verbeux de TF (gardera warnings/erreurs seulement)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -108,17 +110,69 @@ if launch_btn:
             finally:
                 sys.argv = old_argv
 
-        # --- Affichage des résultats ---
+        # --- Vérifier que les résultats existent ---
         if results:
+
+            # -------------------
+            # 1️⃣ Événements détectés
+            # -------------------
+            events_df = pd.DataFrame(results["events"])
             st.subheader("📋 Événements détectés")
-            st.json(results["events"])
+            st.dataframe(events_df)  # tableau scrollable et triable
 
-            st.subheader("🎲 Résultat Viterbi")
-            st.json(results["viterbi_result"])
+            # -------------------
+            # 2️⃣ Résultat Viterbi
+            # -------------------
+            viterbi = results["viterbi_result"]
 
+            # Assignments
+            st.subheader("🎲 Assignments par lancer")
+            assignments_df = pd.DataFrame({
+                "Event": range(len(viterbi["assignments"])),
+                "Siteswap": viterbi["assignments"]
+            })
+            st.bar_chart(assignments_df.set_index("Event"))
+
+            # Residuals
+            st.subheader("📊 Residuals par lancer")
+            residuals_df = pd.DataFrame({
+                "Event": range(len(viterbi["residuals"])),
+                "Residual": viterbi["residuals"]
+            })
+            st.line_chart(residuals_df.set_index("Event"))
+
+            # Throws
+            throws_df = pd.DataFrame(viterbi["throws"])
+            st.subheader("🎯 Détails des lancers")
+            st.dataframe(throws_df)
+
+            # -------------------
+            # 3️⃣ Validation
+            # -------------------
+            val = results["validation"]
             st.subheader("✅ Validation")
-            st.write(results["validation"])
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("Longueur", val["length"])
+            col2.metric("Moyenne balles", round(val["mean_balls"], 2))
+            col3.metric("Moyenne OK", val["mean_ok"])
+            col4.metric("Validité", "✅" if val["valid"] else "❌")
 
-            if len(results["tempo"]["t_mid"]) > 0:
+            if val.get("collisions", False):
+                st.warning("⚠️ Des collisions ont été détectées")
+
+            # -------------------
+            # 4️⃣ Courbe de tempo
+            # -------------------
+            t_mid = results["tempo"]["t_mid"]
+            bpm_local = results["tempo"]["bpm_local"]
+
+            if t_mid is not None and len(t_mid) > 0:
                 st.subheader("📈 Courbe de tempo")
-                st.line_chart({"BPM": results["tempo"]["bpm_local"]})
+                fig, ax = plt.subplots(figsize=(8, 4))
+                ax.plot(t_mid, bpm_local, marker="o", linestyle="-", color="orange", label="Tempo local")
+                ax.set_xlabel("Temps (s)")
+                ax.set_ylabel("BPM")
+                ax.set_title("Courbe de tempo de la prestation")
+                ax.grid(True, alpha=0.3)
+                ax.legend()
+                st.pyplot(fig)
