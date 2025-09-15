@@ -19,6 +19,7 @@ opencv-python = "*"
 tensorflow = "*"
 scikit-learn = "*"
 scikit-plot = "*"
+streamlit = "^1.49.1"
 
 [tool.poetry]
 packages = [
