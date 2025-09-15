@@ -15,9 +15,17 @@ numba = "*"
 plotly = "*"
 matplotlib = "*"
 pandas = "*"
+opencv-python = "*"
+tensorflow = "*"
+scikit-learn = "*"
+scikit-plot = "*"
 
 [tool.poetry]
-package-mode = false
+packages = [
+  { include = "cnn_detections" },
+  { include = "catch_to_siteswap" },
+  { include = "sound_to_catch" },
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

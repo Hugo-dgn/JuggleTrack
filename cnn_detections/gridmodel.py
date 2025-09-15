@@ -1,9 +1,14 @@
 import cv2
 import numpy as np
 import tensorflow as tf
-from losses import grid_loss_with_hands
-from preprocessing import MovingAveragePreprocessor
-from postprocessing import BallsAndHandsPostprocessor, gridToBallsAndHands, flipGrid
+from cnn_detections.losses import grid_loss_with_hands
+from cnn_detections.preprocessing import MovingAveragePreprocessor
+from cnn_detections.postprocessing import (
+    BallsAndHandsPostprocessor,
+    gridToBallsAndHands,
+    flipGrid,
+)
+
 
 # NEW HELPER FUNCTION TO REBUILD THE MODEL ARCHITECTURE
 def build_and_load_legacy_model(filename):
@@ -14,86 +19,91 @@ def build_and_load_legacy_model(filename):
     """
     # This architecture is copied directly from the original traingridmodel.py
     w = 16
-    
-    model = tf.keras.models.Sequential([
-        # The modern, correct way to specify input shape
-        tf.keras.Input(shape=(64, 64, 3)),
 
-        tf.keras.layers.Conv2D(w, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.MaxPooling2D(),
-        
-        tf.keras.layers.Conv2D(w*2, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w*2, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w*2, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w*2, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.MaxPooling2D(),
-
-        tf.keras.layers.Conv2D(w*4, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w*4, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w*4, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(w*4, (3,3), padding='same'),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.MaxPooling2D(),
-
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(w*64),
-        tf.keras.layers.LeakyReLU(),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Dense(15*15*9, activation='sigmoid'),
-        tf.keras.layers.Reshape((15,15,9))
-    ])
+    model = tf.keras.models.Sequential(
+        [
+            # The modern, correct way to specify input shape
+            tf.keras.Input(shape=(64, 64, 3)),
+            tf.keras.layers.Conv2D(w, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.MaxPooling2D(),
+            tf.keras.layers.Conv2D(w * 2, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w * 2, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w * 2, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w * 2, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.MaxPooling2D(),
+            tf.keras.layers.Conv2D(w * 4, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w * 4, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w * 4, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(w * 4, (3, 3), padding="same"),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.MaxPooling2D(),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dropout(0.5),
+            tf.keras.layers.Dense(w * 64),
+            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Dense(15 * 15 * 9, activation="sigmoid"),
+            tf.keras.layers.Reshape((15, 15, 9)),
+        ]
+    )
 
     # Now, load only the weights into the correctly structured model
     model.load_weights(filename)
-    
+
     return model
 
 
 class GridModel:
-    def __init__(self, filename, nBalls=3, preprocessType="SUBMOVAVG", flip=False, postprocess=True):
+    def __init__(
+        self,
+        filename,
+        nBalls=3,
+        preprocessType="SUBMOVAVG",
+        flip=False,
+        postprocess=True,
+    ):
         self.filename = filename
         self.preprocessType = preprocessType
         self.flip = flip
         self.postprocess = postprocess
-        
+
         # MODIFIED: Instead of using load_model, we call our new helper function.
         print("Rebuilding model architecture for compatibility...")
         self.model = build_and_load_legacy_model(filename)
         print("Model weights loaded successfully.")
-        
+
         self.input_shape = self.model.input_shape[1:3]
         self.reset(nBalls)
 
@@ -108,7 +118,6 @@ class GridModel:
         print(f"  Postprocessing: {postStr}")
         print(f"  Expected Input Shape: {self.input_shape}")
         print("-------------------------\n")
-
 
     def reset(self, nBalls):
         """Resets the postprocessing modules, typically when the number of balls changes."""
