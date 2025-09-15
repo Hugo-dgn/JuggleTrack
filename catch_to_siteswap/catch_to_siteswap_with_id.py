@@ -48,18 +48,6 @@ def compute_siteswap(events, tol=0.25):
     return siteswap, conf
 
 
-# Exemple
-events = [
-    {"time": 0.30, "ball_id": 1},
-    {"time": 0.60, "ball_id": 2},
-    {"time": 0.90, "ball_id": 3},
-    {"time": 1.25, "ball_id": 1},
-    {"time": 1.55, "ball_id": 2},
-    {"time": 1.90, "ball_id": 3},
-    {"time": 2.20, "ball_id": 1},
-]
-
-
 def validate_siteswap(siteswap):
     """
     Vérifie la cohérence d'une séquence de siteswap.
@@ -89,10 +77,21 @@ def validate_siteswap(siteswap):
     return result
 
 
-s, conf = compute_siteswap(events)
-report = validate_siteswap(s)
-
-if report["valid"]:
-    print("Siteswap cohérent :", s, "(", report["mean_balls"], "balles )")
-else:
-    print("⚠️ Problème détecté :", report)
+# Exemple
+# events = [
+#    {"time": 0.30, "ball_id": 1},
+#    {"time": 0.60, "ball_id": 2},
+#    {"time": 0.90, "ball_id": 3},
+#    {"time": 1.25, "ball_id": 1},
+#    {"time": 1.55, "ball_id": 2},
+#    {"time": 1.90, "ball_id": 3},
+#    {"time": 2.20, "ball_id": 1},
+# ]
+#
+# s, conf = compute_siteswap(events)
+# report = validate_siteswap(s)
+#
+# if report["valid"]:
+#    print("Siteswap cohérent :", s, "(", report["mean_balls"], "balles )")
+# else:
+#    print("⚠️ Problème détecté :", report)
