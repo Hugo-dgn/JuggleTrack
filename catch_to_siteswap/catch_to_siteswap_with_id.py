@@ -48,17 +48,50 @@ def compute_siteswap(events, tol=0.25):
     return siteswap, conf
 
 
-# Exemple
-events = [
-    {"time": 0.30, "ball_id": 1},
-    {"time": 0.60, "ball_id": 2},
-    {"time": 0.90, "ball_id": 3},
-    {"time": 1.25, "ball_id": 1},
-    {"time": 1.55, "ball_id": 2},
-    {"time": 1.90, "ball_id": 3},
-    {"time": 2.20, "ball_id": 1},
-]
+def validate_siteswap(siteswap):
+    """
+    Vérifie la cohérence d'une séquence de siteswap.
+    siteswap: liste d'entiers
+    Retourne un dict avec diagnostic
+    """
+    n = len(siteswap)
+    total = sum(siteswap)
 
-s, conf = compute_siteswap(events)
-print("Siteswap:", s)
-print("Confiance:", conf)
+    # condition 1 : moyenne entière
+    mean_balls = total / n
+    balls_ok = mean_balls.is_integer()
+
+    # condition 2 : pas de collisions
+    landings = [(i + siteswap[i]) % n for i in range(n)]
+    collisions = len(landings) != len(set(landings))
+
+    # rapport
+    result = {
+        "length": n,
+        "sequence": siteswap,
+        "mean_balls": mean_balls,
+        "balls_ok": balls_ok,
+        "collisions": collisions,
+        "valid": balls_ok and not collisions,
+    }
+    return result
+
+
+# Exemple
+# events = [
+#    {"time": 0.30, "ball_id": 1},
+#    {"time": 0.60, "ball_id": 2},
+#    {"time": 0.90, "ball_id": 3},
+#    {"time": 1.25, "ball_id": 1},
+#    {"time": 1.55, "ball_id": 2},
+#    {"time": 1.90, "ball_id": 3},
+#    {"time": 2.20, "ball_id": 1},
+# ]
+#
+# s, conf = compute_siteswap(events)
+# report = validate_siteswap(s)
+#
+# if report["valid"]:
+#    print("Siteswap cohérent :", s, "(", report["mean_balls"], "balles )")
+# else:
+#    print("⚠️ Problème détecté :", report)

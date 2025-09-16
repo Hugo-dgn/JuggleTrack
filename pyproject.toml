@@ -1,0 +1,32 @@
+[project]
+name = "juggletrack"
+version = "0.1.0"
+description = "Juggling tracking project"
+authors = [
+    { name = "Your Name", email = "you@example.com" }
+]
+readme = "README.md"
+requires-python = ">=3.12"
+
+[tool.poetry.dependencies]
+librosa = "*"
+numpy = "<2.3.0"
+numba = "*"
+plotly = "*"
+matplotlib = "*"
+pandas = "*"
+opencv-python = "*"
+tensorflow = "*"
+scikit-learn = "*"
+scikit-plot = "*"
+
+[tool.poetry]
+packages = [
+  { include = "cnn_detections" },
+  { include = "catch_to_siteswap" },
+  { include = "sound_to_catch" },
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
