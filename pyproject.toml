@@ -16,10 +16,11 @@ plotly = "*"
 matplotlib = "*"
 pandas = "*"
 opencv-python = "*"
-tensorflow = "*"
 scikit-learn = "*"
 scikit-plot = "*"
 streamlit = "^1.49.1"
+tensorflow = "*"
+ffmpeg-python = "*"
 
 [tool.poetry]
 packages = [

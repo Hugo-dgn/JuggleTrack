@@ -6,7 +6,26 @@ The system is split into two main scripts, each with a distinct purpose.
 
 ## Prerequisites
 
-You need the pre-trained grid model (`grid_model_submovavg_64x64.h5` or similar) placed in a `../grid_models/` directory relative to the scripts.
+You need the pre-trained grid model (`grid_model_submovavg_64x64.h5` or similar) placed in a `../grid_models/` directory relative to the scripts (with the current configuration place the model directory in the main JuggleTrack folder). The model weights can be found in the associated drive.
+
+It is suggested to install ffmpeg to be sure to have the correct orientation of the video. Indeed, some videos filmed with android can be saved and read by opencv as being horizontal when they are vertical leading to incorrect detections. In most cases this isn't necessary, especially if you aren't using an android device for filming, but if you start having weird results try installing ffmpeg. 
+
+To install ffmpeg:
+
+-   **macOS (using [Homebrew](https://brew.sh/)):**
+    ```bash
+    brew install ffmpeg
+    ```
+
+-   **Linux (Ubuntu/Debian):**
+    ```bash
+    sudo apt-get update && sudo apt-get install ffmpeg
+    ```
+
+-   **Windows (using [Chocolatey](https://chocolatey.org/)):**
+    ```bash
+    choco install ffmpeg
+    ```
 
 ---
 
@@ -17,8 +36,9 @@ This is the primary analysis script. Its sole purpose is to process a video and 
 ### Inputs
 
 *   `--video` (**required**): The file path to the input juggling video (e.g., `my_video.mp4`).
-*   `--model` (optional): The file path to the pre-trained grid model. Defaults to `../grid_models/grid_model_submovavg_64x64.h5`.
+*   `--model` (optional): The file path to the pre-trained grid model. Defaults to `grid_models/grid_model_submovavg_64x64.h5`.
 *   `--n_balls` (optional): The number of balls in the video. Defaults to `3`.
+*   `--min_flight` (optional): Minimum flight frames for a SAME-HAND catch. Defaults to `6`.
 
 ### Output
 
@@ -60,16 +80,18 @@ To use it, import the function from the `main_analyzer` file.
 
 ---
 
-## `create_visuals.py` - Annotated Video Generation (Testing & Debugging)
+## `create_annotated_video.py` - Annotated Video Generation (Testing & Debugging)
 
 This script is for debugging and visualization. It runs the full analysis pipeline and uses the results to generate a new video file with detailed annotations. It helps you visually confirm the performance of the tracker and the state analysis.
 
 ### Inputs
 
 *   `--video` (**required**): The file path to the input juggling video.
-*   `--model` (optional): The file path to the pre-trained grid model. Defaults to `../grid_models/grid_model_submovavg_64x64.h5`.
+*   `--model` (optional): The file path to the pre-trained grid model. Defaults to `grid_models/grid_model_submovavg_64x64.h5`.
 *   `--output` (optional): The file path where the output annotated video will be saved. Defaults to `output_visuals.mp4`.
 *   `--n_balls` (optional): The number of balls in the video. Defaults to `3`.
+*   `--min_flight` (optional): Minimum flight frames for a SAME-HAND catch. Defaults to `6`.
+*   `--highlight_window` (optional): Number of frames before and after a catch to apply the highlight. Defaults to `2`.
 
 ### Output
 
@@ -80,6 +102,7 @@ The script generates a new `.mp4` video file. In this video:
     *   **Red Border:** The ball is in the left hand.
     *   **Green Border:** The ball is in the right hand.
 *   Hands are marked with red (left) and green (right) lines.
+*   A highlighted yellow halo appears around the balls when they are caught and 2 frames before and after.
 
 ### Usage (from the Command Line)
 
