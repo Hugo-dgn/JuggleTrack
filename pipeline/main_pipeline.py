@@ -155,6 +155,13 @@ def main():
                 plt.show()
             else:
                 plt.close(fig)
+    
+    return {
+        "events": events,
+        "viterbi_result": res,
+        "validation": val,
+        "tempo": {"t_mid": t_mid, "bpm_local": bpm_local},
+    }
 
 
 if __name__ == "__main__":
