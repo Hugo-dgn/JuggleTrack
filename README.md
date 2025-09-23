@@ -1,87 +1,98 @@
 # Installation
 
-All the requirements are listed in `requirements.txt`. Install them with:
+## Installation (avec Poetry)
+
+### 1. Prérequis (macOS)
+- macOS 
+- Python 3.12 installé (si nécessaire : `brew install python@3.12`)
+- FFmpeg (pour l’audio/vidéo) :
+```bash
+brew install ffmpeg
+```
+
+### 2. Installer Poetry (si pas déjà installé)
+```bash
+pip install poetry
+```
+
+ou 
 
 ```bash
-pip install -r requirements.txt
+curl -sSL https://install.python-poetry.org | python3 -
 ```
-
-# Download Example Video
-
-Download the file **`ss_64x_id881.MP4`** from the [Juggling Dataset](https://sites.google.com/view/jugglingdataset) and place it in:
-
-```
-dataset/videos/ss_64x_id881.MP4
-```
-
-# Ball Detection
-
-First, detect the positions of the balls in the video:
-
+Ajoute Poetry au PATH (si nécessaire, fichier `~/.zshrc`) :
 ```bash
-python main.py detect dataset/videos/ss_64x_id881.MP4
+export PATH="$HOME/.local/bin:$PATH"
+```
+Recharge :
+```bash
+source ~/.zshrc
+poetry --version
 ```
 
-This will save the results in `results/detections`.
-
-# Ball Tracking
-
-Then, track the balls to obtain their trajectories:
-
+### 3. Cloner le dépôt
 ```bash
-python main.py track results/detections/ss_64x_id881.csv 5
+git clone <URL_DU_DEPOT>
+cd JuggleTrack
 ```
 
-Here, `5` is the number of balls.
-The result will be saved in `results/trajectories`.
-
-# Hand Tracking
-
-To detect the positions of the hands:
-
+### 4. Installation des dépendances
+Installation normale :
 ```bash
-python main.py hands dataset/videos/ss_64x_id881.MP4
+poetry install
 ```
 
-This will save the results in `results/hands`.
 
-# Throw/Catch Detection
-
-Run the throw/catch detection step:
-
+### 5. Gestion de TensorFlow sur macOS (Apple Silicon)
+Les packages `tensorflow` standards peuvent poser problème. Utilise la version macOS :
 ```bash
-python main.py transitions results/trajectories/ss_64x_id881.csv
+poetry remove tensorflow
+poetry add tensorflow-macos
+```
+(Optionnel Metal GPU) :
+```bash
+poetry add tensorflow-metal
 ```
 
-The results will be stored in `results/transitions`.
-
-# Visualize Results
-
-You can visualize the results with:
-
+Si un message “lock file is currently blocking” / “lock blocking” ou conflit de version apparaît :
 ```bash
-python main.py display results/trajectories/ss_64x_id881.csv --transitions 0
+rm poetry.lock
+poetry lock
+poetry install
 ```
 
-This will print the throw and catch events for the ball with ID `0`.
-
-# General Command Forms
-
-For any video file `<video_path>` and number of balls `<num_balls>`, the general usage is:
-
+### 6. Activer l’environnement
+Deux méthodes :
 ```bash
-# Detect balls
-python main.py detect <video_path>
+poetry env activate          # ouvre un shell virtuel ou donne la commande à lancer pour l'ouvrir
+# ou sans activer directement :
+poetry run python -V
+```
 
-# Track balls
-python main.py track results/detections/<video_name>.csv <num_balls>
 
-# Track hands
-python main.py hands <video_path>
+### 7. Lancer l’application Streamlit
+```bash
+poetry run streamlit run app.py
+```
 
-# Detect throw/catch transitions
-python main.py transitions results/trajectories/<video_name>.csv
+### 8. Résolution de problèmes fréquents
+| Problème | Solution |
+|----------|----------|
+| ModuleNotFoundError | Toujours lancer avec `poetry run ...` |
+| TensorFlow KO | Utiliser `tensorflow-macos` + éventuellement `tensorflow-metal` |
+| ffmpeg introuvable | `brew install ffmpeg` |
 
-# Visualize trajectories (with optional transitions for a given ball ID)
-python main.py display results/trajectories/<video_name>.csv --transitions <ball_id>
+### 9. Mise à jour des dépendances
+```bash
+poetry update
+```
+
+### 10. Exécuter un script arbitraire
+```bash
+poetry run python path/to/script.py
+```
+
+### 13. Quitter l’environnement
+```bash
+deactivate    # si dans 'poetry shell'
 ```
