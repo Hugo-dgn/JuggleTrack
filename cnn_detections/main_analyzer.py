@@ -35,7 +35,6 @@ def find_catch_events(
     # Step 1: Get the raw tracking data
     rotation_code = get_video_rotation(video_path)
     tracking_data = get_tracking_data(video_path, model_path, n_balls, rotation_code = rotation_code)
-    tracking_data = get_tracking_data(video_path, model_path, n_balls)
     if not tracking_data:
         print("Error: Failed to extract tracking data. Aborting.")
         return []
