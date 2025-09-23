@@ -1,5 +1,5 @@
 import argparse
-# Import the functions from our library file
+
 from cnn_detections.juggling_processor import (
     configure_gpu,
     get_tracking_data,
@@ -8,7 +8,10 @@ from cnn_detections.juggling_processor import (
     get_video_rotation
 )
 
-def find_catch_events(video_path, model_path="grid_models/grid_model_submovavg_64x64.h5", n_balls=3, min_flight_frames=6):
+
+def find_catch_events(
+    video_path, model_path="grid_models/grid_model_submovavg_64x64.h5", n_balls=3, min_flight_frames=6
+):
     """
     Identifies catch events with context-aware validation.
 
@@ -32,6 +35,7 @@ def find_catch_events(video_path, model_path="grid_models/grid_model_submovavg_6
     # Step 1: Get the raw tracking data
     rotation_code = get_video_rotation(video_path)
     tracking_data = get_tracking_data(video_path, model_path, n_balls, rotation_code = rotation_code)
+    tracking_data = get_tracking_data(video_path, model_path, n_balls)
     if not tracking_data:
         print("Error: Failed to extract tracking data. Aborting.")
         return []
@@ -43,7 +47,7 @@ def find_catch_events(video_path, model_path="grid_models/grid_model_submovavg_6
     filtered_ball_states = filter_short_hand_states(raw_ball_states)
 
     # Step 4: Find the final list of catch events from the clean states
-    print(f"\n--- Finding Catch Events (min same-hand flight time: {min_flight_frames} frames) ---")
+    print("\n--- Finding Catch Events ---")
     catch_events = []
     
     # Iterate through each ball's state trajectory
@@ -105,23 +109,41 @@ def find_catch_events(video_path, model_path="grid_models/grid_model_submovavg_6
     catch_events.sort(key=lambda x: x['catch_frame'])
     return catch_events
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Analyze a juggling video to find all valid catch events.")
-    parser.add_argument('--video', type=str, required=True, help="Path to the input video file.")
-    parser.add_argument('--model', type=str, default='grid_models/grid_model_submovavg_64x64.h5', help="Path to the pre-trained grid model.")
-    parser.add_argument('--n_balls', type=int, default=3, help="Number of balls in the video.")
+
+if __name__ == "__main__":
+    # This block is now ONLY for handling the Command-Line Interface (CLI)
+    parser = argparse.ArgumentParser(
+        description="Analyze a juggling video to find all catch events."
+    )
+    parser.add_argument(
+        "--video", type=str, required=True, help="Path to the input video file."
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="grid_models/grid_model_submovavg_64x64.h5",
+        help="Path to the pre-trained grid model.",
+    )
+    parser.add_argument(
+        "--n_balls", type=int, default=3, help="Number of balls in the video."
+    )
     parser.add_argument('--min_flight', type=int, default=4, help="Minimum flight frames required for a SAME-HAND catch to be valid.")
-    
+
     args = parser.parse_args()
     
     configure_gpu()
-        
+
+    # Call the main function with arguments from the CLI
     final_catch_events = find_catch_events(video_path=args.video, model_path=args.model, n_balls=args.n_balls, min_flight_frames=args.min_flight)
-    
+
+    # --- FINAL REPORT ---
+    # This section is for formatting and printing the output for the user
     print("\n--- CATCH EVENT REPORT ---")
     if not final_catch_events:
-        print("No valid catch events were detected.")
+        print("No catch events were detected.")
     else:
         for event in final_catch_events:
-            print(f"Frame {event['catch_frame']:<5} | Ball {event['ball_id']} was caught by the {event['hand_id']} hand.")
+            print(
+                f"Frame {event['catch_frame']:<5} | Ball {event['ball_id']} was caught by the {event['hand_id']} hand."
+            )
     print("--------------------------\n")
