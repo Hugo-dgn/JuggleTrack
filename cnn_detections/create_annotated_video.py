@@ -30,7 +30,6 @@ def create_annotated_video(
         rotation_code (int, optional): The cv2 rotation code to apply to each frame. Defaults to None.
     """
     print("\n--- Creating Annotated Video with Catch Highlights ---")
-    print("Rotation code:", rotation_code)
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print(f"Error: Could not open video file at {video_path}")

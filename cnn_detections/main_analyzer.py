@@ -32,7 +32,6 @@ def find_catch_events(video_path, model_path="grid_models/grid_model_submovavg_6
     # Step 1: Get the raw tracking data
     rotation_code = get_video_rotation(video_path)
     tracking_data = get_tracking_data(video_path, model_path, n_balls, rotation_code = rotation_code)
-    print(tracking_data)
     if not tracking_data:
         print("Error: Failed to extract tracking data. Aborting.")
         return []
@@ -104,7 +103,6 @@ def find_catch_events(video_path, model_path="grid_models/grid_model_submovavg_6
 
     # Sort events by frame number for a chronological report
     catch_events.sort(key=lambda x: x['catch_frame'])
-    print(len(catch_events))
     return catch_events
 
 if __name__ == '__main__':
